@@ -78,4 +78,37 @@ router.post('/register', async (req, res)=> {
     }
 });
 
+router.post('/login', async (req, res)=> {
+    const { email, password } = req.body;
+
+    const emailValidated = await validateEmail(email);
+    if(!emailValidated.valid) {
+        return res.status(400).json({error: emailValidated.message});
+    }
+    const normalizedEmail = validator.normalizeEmail(email);
+
+    if(!password) {
+        return res.status(400).json({error: 'Password is required.'});
+    }
+
+    try {
+        const result = await db.query('SELECT * FROM users WHERE email=$1', [normalizedEmail]);
+        const user = result.rows[0];
+
+        if(!user) {
+            return res.status(400).json({error: 'Email or password is not correct.'});
+        }
+        const valid = await bcrypt.compare(password, user.password_hash);
+        if(!valid) {
+            return res.status(400).json({error: 'Invalid credentials'});
+        }
+        const token = jwt.sign({userId: user.id}, JWT_SECRET, {expiresIn: '30m'});
+        res.json({token, user: {id: user.id, email: user.email}});
+
+    } catch (error) {
+        console.error('Login error: ', error);
+        res.status(500).json({error: 'Something went wrong with logining the user.'});
+    }
+})
+
 module.exports = router;
