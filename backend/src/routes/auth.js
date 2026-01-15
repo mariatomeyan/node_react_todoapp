@@ -26,6 +26,19 @@ function validateEmail(email) {
     return {valid: true};
 }
 
+function validatePassword(password) {
+    if (!password) {
+        return { valid: false, message: 'Password is required' };
+    }
+    if(!validator.isStrongPassword(password, PASSWORD_VALIDATION_OPTIONS)) {
+        return {
+            valid: false,
+            message: 'Password must be at least 8 characters with uppercase, lowercase, number and symmbol'
+        };
+    }
+    return {valid: true};
+}
+
 // endpoints
 router.post('/register', async (req, res)=> {
     const { email, password } = req.body;
