@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
+const todoRoutes = require('./routes/todos');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 //routes
 app.use('/api/auth', authRoutes);
+app.use('/api/todos', todoRoutes);
 
 app.get('/', (req, res) => {
     res.json({message: 'TODO API is running:'});
