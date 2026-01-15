@@ -15,18 +15,20 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const title = req.body.title?.trim();
+    const description = req.body.description?.trim() || null;
+
     if (!title) return res.status(400).json({ error: 'Title is required' });
 
     const result = await db.query(
-        'INSERT INTO todos (user_id, title) VALUES ($1, $2) RETURNING *',
-        [req.userId, title]
+        'INSERT INTO todos (user_id, title, description) VALUES ($1, $2, $3) RETURNING *',
+        [req.userId, title, description]
     );
     res.status(201).json(result.rows[0]);
 });
 
 router.put('/:id', async (req, res) => {
     const id = req.params.id;
-    const { title, completed } = req.body;
+    const { title, description, completed } = req.body;
 
     // check ownership
     const check = await db.query(
@@ -36,7 +38,6 @@ router.put('/:id', async (req, res) => {
         return res.status(404).json({ error: 'Not found' });
     }
 
-    // dynamically build query based on what fields are provided
     const fields = [];
     const vals = [];
     let n = 1;
@@ -44,6 +45,10 @@ router.put('/:id', async (req, res) => {
     if (title !== undefined) {
         fields.push('title = $' + n++);
         vals.push(title.trim());
+    }
+    if (description !== undefined) {
+        fields.push('description = $' + n++);
+        vals.push(description?.trim() || null);
     }
     if (completed !== undefined) {
         fields.push('completed = $' + n++);
@@ -53,6 +58,8 @@ router.put('/:id', async (req, res) => {
     if (!fields.length) {
         return res.status(400).json({ error: 'Nothing to update' });
     }
+
+    fields.push('updated_at = CURRENT_TIMESTAMP');
 
     vals.push(id, req.userId);
 
