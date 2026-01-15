@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
-const db = require('./db');
+const db = require('../db');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || supersecretcode;
@@ -46,14 +46,14 @@ router.post('/register', async (req, res)=> {
     //validate email
     const emailValidated = await validateEmail(email);
     if(!emailValidated.valid) {
-        return res.status(400).send({error: emailValidated.message});
+        return res.status(400).json({error: emailValidated.message});
     }
     const normalizedEmail = validator.normalizeEmail(email);
 
     //validate password
     const passwordValidated = await validatePassword(password);
     if(!passwordValidated.valid) {
-        return res.status(400).send({error: passwordValidated.message});
+        return res.status(400).json({error: passwordValidated.message});
     }
 
     try {
