@@ -5,7 +5,7 @@ const validator = require('validator');
 const db = require('../db');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || supersecretcode;
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecretcode';
 
 //Requirments for password
 const PASSWORD_VALIDATION_OPTIONS = {
