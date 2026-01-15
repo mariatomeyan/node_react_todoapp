@@ -43,16 +43,21 @@ function validatePassword(password) {
 router.post('/register', async (req, res)=> {
     const { email, password } = req.body;
 
-    if(!email || !password) {
-        return res.status(400).json({error: 'Email and password required'});
+    //validate email
+    const emailValidated = await validateEmail(email);
+    if(!emailValidated.valid) {
+        return res.status(400).send({error: emailValidated.message});
     }
+    const normalizedEmail = validator.normalizeEmail(email);
 
-    if(password.length < 6) {
-        return res.status(400).json({error: 'Password must be at least 6 characters'});
+    //validate password
+    const passwordValidated = await validatePassword(password);
+    if(!passwordValidated.valid) {
+        return res.status(400).send({error: passwordValidated.message});
     }
 
     try {
-        const existing = await db.query('SELECT * FROM users WHERE email=$1', [email]);
+        const existing = await db.query('SELECT * FROM users WHERE email=$1', [normalizedEmail]);
         if(!existing.rows.length > 0) {
             return res.status(400).json({error: 'Email already exists'});
         }
