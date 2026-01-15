@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     const id = req.params.id;
-    const { title, description, completed } = req.body;
+    const { title, description, is_completed } = req.body;
 
     // check ownership
     const check = await db.query(
@@ -50,15 +50,16 @@ router.put('/:id', async (req, res) => {
         fields.push('description = $' + n++);
         vals.push(description?.trim() || null);
     }
-    if (completed !== undefined) {
-        fields.push('completed = $' + n++);
-        vals.push(completed);
+    if (is_completed !== undefined) {
+        fields.push('is_completed = $' + n++);
+        vals.push(is_completed);
     }
 
     if (!fields.length) {
         return res.status(400).json({ error: 'Nothing to update' });
     }
 
+    // always update updated_at
     fields.push('updated_at = CURRENT_TIMESTAMP');
 
     vals.push(id, req.userId);
