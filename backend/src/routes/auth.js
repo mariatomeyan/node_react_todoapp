@@ -1,10 +1,30 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const db = require('./db');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || supersecretcode;
+
+//Requirments for password
+const PASSWORD_VALIDATION_OPTIONS = {
+    minLength: 6,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+}
+
+function validateEmail(email) {
+    if (!email) {
+        return { valid: false, message: 'Email is required' };
+    }
+    if(!validator.isEmail(email)) {
+        return { valid: false, message: 'Invalid email address' };
+    }
+    return {valid: true};
+}
 
 // endpoints
 router.post('/register', async (req, res)=> {
